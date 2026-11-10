@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Truco Argentino Online</title>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#12493a;--bg2:#0a2a21;--fg:#f4efe2;--ac:#d6a84a;--card:#fbf7ec;--ink:#1d1d1d;--red:#a3322b}
+html{height:100%}body{height:100%;margin:0;background:radial-gradient(ellipse at 50% 40%,var(--bg),var(--bg2));color:var(--fg);font:16px/1.4 system-ui,sans-serif}
+h1,.big,.sc b,.c b{font-family:'Alfa Slab One',Georgia,serif;font-weight:400}
+.hide{display:none!important}
+.scr{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:12px;box-sizing:border-box}
+h1{font-size:clamp(44px,12vw,84px);margin:0;color:var(--ac);text-shadow:0 4px 0 var(--bg2)}
+.sub{margin:0 0 14px;opacity:.8}
+button{font:inherit;font-weight:600;color:var(--fg);background:transparent;border:2px solid var(--ac);border-radius:6px;padding:9px 16px;cursor:pointer}
+button:hover,button:focus-visible{background:var(--ac);color:var(--bg2);outline:none}
+input{font:inherit;box-sizing:border-box;padding:10px;border:2px solid var(--ac);border-radius:6px;background:var(--bg);color:var(--fg);width:min(300px,86vw)}
+.menu button{width:min(300px,86vw);font-size:18px;padding:12px}
+.join{display:flex;gap:8px;width:min(300px,86vw)}.join input{width:100%;text-transform:uppercase}
+#game{justify-content:space-between;gap:6px}
+.bar{display:flex;gap:18px;align-items:center;width:100%;max-width:640px;justify-content:space-between}
+.sc{text-align:center}.sc b{display:block;font-size:30px;color:var(--ac)}
+#info,#st{font-size:14px;text-align:center;opacity:.9}
+.row{display:flex;gap:8px;justify-content:center;min-height:clamp(78px,23vw,108px)}
+.c{width:clamp(52px,16vw,72px);aspect-ratio:2/3;border-radius:8px;background:var(--card);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 6px #0007;border:2px solid #0003;box-sizing:border-box;user-select:none}
+.c b{font-size:clamp(24px,7vw,34px)}.c i{font-size:11px;font-style:normal;font-weight:700}
+.espada{color:#1f4fa8}.basto{color:#1e7a38}.oro{color:#a96a00}.copa{color:#b3261e}
+.back{background:repeating-linear-gradient(45deg,var(--red) 0 6px,#7c241f 6px 12px);border-color:var(--card)}
+.ok{cursor:pointer;transform:translateY(-6px);transition:transform .15s}.ok:hover{transform:translateY(-12px)}
+.ph{width:clamp(52px,16vw,72px);aspect-ratio:2/3;border:2px dashed #fff3;border-radius:8px;box-sizing:border-box}
+.tbl{display:flex;gap:clamp(8px,3vw,22px);justify-content:center}.slot{display:flex;flex-direction:column;gap:8px}
+#acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:44px}
+#log{width:100%;max-width:640px;height:84px;overflow:hidden;font-size:13px;opacity:.85;display:flex;flex-direction:column;justify-content:flex-end;border-top:1px solid #fff2;padding-top:4px}
+.modal{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box;z-index:5}
+.box{background:var(--bg2);border:2px solid var(--ac);border-radius:10px;padding:18px;max-width:560px;max-height:88vh;overflow:auto}
+.box h2{margin:0 0 8px;color:var(--ac)}.box li{margin:6px 0}.box ul{padding-left:20px;margin:0 0 12px}
+.big{font-size:30px;margin:0 0 14px;color:var(--ac)}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ac);color:var(--bg2);padding:10px 16px;border-radius:6px;font-weight:600;z-index:9}
+</style></head><body>
+<div id="menu" class="scr menu">
+<h1>Truco</h1><p class="sub">Argentino · a 30 puntos</p>
+<input id="nm" maxlength="14" placeholder="Tu nombre">
+<button onclick="go('crear',true)">Jugar vs IA</button>
+<button onclick="go('crear',false)">Crear sala online</button>
+<div class="join"><input id="cod" maxlength="4" placeholder="Código"><button onclick="join()">Unirse</button></div>
+<button onclick="show('rules')">Reglas</button>
+</div>
+<div id="wait" class="scr hide"><p class="sub">Compartí este código con tu rival</p><p class="big" id="wc" style="font-size:64px"></p><p class="sub">Esperando que se una…</p><button onclick="location.reload()">Cancelar</button></div>
+<div id="game" class="scr hide">
+<div class="bar"><div class="sc"><span id="n1"></span><b id="s1">0</b></div><div id="info"></div><div class="sc"><span id="n0"></span><b id="s0">0</b></div></div>
+<div id="ho" class="row"></div><div id="tb" class="tbl"></div><div id="st"></div><div id="hp" class="row"></div>
+<div id="acts"></div><div id="log"></div>
+<button onclick="location.reload()" style="font-size:13px;padding:4px 10px">Salir</button>
+</div>
+<div id="rules" class="modal hide"><div class="box"><h2>Reglas</h2><ul>
+<li>Se gana la partida al llegar a 30 puntos. Se juega sin Flor.</li>
+<li>Cada mano: 3 cartas y 3 rondas; gana quien gane 2. Si hay parda, define la ronda siguiente; si empardan todas, gana el mano. Quien gana una ronda inicia la próxima.</li>
+<li>Orden de cartas, de mayor a menor: 1 de espada, 1 de basto, 7 de espada, 7 de oro, los 3, los 2, 1 de oro y de copa, 12, 11, 10, 7 de copa y de basto, 6, 5, 4.</li>
+<li>Envido: solo en la primera ronda, antes de jugar tu primera carta (o para subir). Dos cartas del mismo palo suman 20 más su valor; 10, 11 y 12 valen 0. Envido vale 2, Real Envido 3 y Falta Envido lo que le falta al que va ganando para llegar a 30. Si se sube, vale lo último cantado. Si no se quiere el primer canto, suma 1 punto quien cantó; si no se quiere una suba, suma el valor del canto anterior. En empate gana el mano.</li>
+<li>Truco vale 2, Retruco 3 y Vale cuatro 4 (lo último cantado). Solo puede subir quien dijo «Quiero». Con «No quiero», el rival suma 1 punto si era al Truco, 2 al Retruco y 3 al Vale cuatro. Sin truco, la mano vale 1.</li>
+<li>En la tercera ronda no se puede cantar Truco, Retruco ni Vale cuatro si ya se jugó un 4 o si tu última carta es un 4.</li>
+<li>Irse al mazo: el rival suma lo que valga la mano (más 1 si el envido seguía pendiente).</li></ul>
+<button onclick="hide('rules')">Cerrar</button></div></div>
+<div id="over" class="modal hide"><div class="box" style="text-align:center"><p class="big" id="ov"></p><button onclick="location.reload()">Volver al menú</button></div></div>
+<div id="toast" class="hide"></div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const $=i=>document.getElementById(i),so=io(),TN=['','Truco','Retruco','Vale cuatro'];let G=null,tt;
+const show=i=>$(i).classList.remove('hide'),hide=i=>$(i).classList.add('hide');
+function toast(t){const e=$('toast');e.textContent=t;show('toast');clearTimeout(tt);tt=setTimeout(()=>hide('toast'),2600)}
+try{$('nm').value=localStorage.getItem('truco_nombre')||''}catch(e){}
+function nombre(){const n=$('nm').value.replace(/[<>&"'`\\]/g,'').trim().slice(0,14)||'Jugador';try{localStorage.setItem('truco_nombre',n)}catch(e){}return n}
+function go(ev,ia){so.emit(ev,nombre(),ia)}
+function join(){const c=$('cod').value.trim();if(c.length<4)return toast('Escribí el código de 4 letras.');so.emit('unirse',c,nombre())}
+so.on('sala',c=>{hide('menu');$('wc').textContent=c;show('wait')});
+so.on('error',m=>toast(m));
+so.on('salio',()=>{toast('Tu rival se desconectó.');setTimeout(()=>location.reload(),2200)});
+so.on('estado',v=>{G=v;hide('menu');hide('wait');show('game');render()});
+function ch(c,x){return'<div class="c '+c.s+(x?' ok" onclick="'+x:'')+'"><b>'+c.n+'</b><i>'+c.s+'</i></div>'}
+function send(i){so.emit('accion',{t:'play',i})}
+function A(i){const a=G.acts[i];so.emit('accion',{t:a.t,k:a.k})}
+function render(){const v=G,y=v.you,o=1-y;
+$('n0').textContent=v.names[y];$('n1').textContent=v.names[o];$('s0').textContent=v.sc[y];$('s1').textContent=v.sc[o];
+$('info').textContent='Mano: '+v.names[v.mano]+' · Truco: '+(v.tl?TN[v.tl]:'sin cantar')+' · La mano vale '+v.val;
+$('ho').innerHTML='<div class="c back"></div>'.repeat(v.oppN);
+let t='';for(let i=0;i<3;i++){const a=v.pl[o][i],p=v.pl[y][i];t+='<div class="slot">'+(a?ch(a):'<div class="ph"></div>')+(p?ch(p):'<div class="ph"></div>')+'</div>'}
+$('tb').innerHTML=t;
+const can=v.turn==y&&!v.pend&&!v.pause&&v.over==null;
+$('hp').innerHTML=v.hand.map((c,i)=>ch(c,can?'send('+i+')':'')).join('');
+$('st').textContent=v.over!=null?'Fin de la partida':v.pause?'…':v.pend?(v.pend.to==y?'Tenés que responder':'Esperando a '+v.names[o]+'…'):(v.turn==y?'Tu turno':'Juega '+v.names[o]+'…');
+$('acts').innerHTML=v.acts.map((a,i)=>'<button onclick="A('+i+')">'+a.l+'</button>').join('');
+$('log').innerHTML=v.logs.map(x=>'<div>'+x+'</div>').join('');
+if(v.over!=null){$('ov').textContent=v.over==y?'¡Ganaste la partida!':v.names[v.over]+' ganó la partida';show('over')}}
+</script></body></html>
